@@ -25,15 +25,20 @@ void* always_receiving(void* arg) {
 	sleep(3);
 	while(1) {
 		recvfrom(connection_socket, receive_msg, sizeof(receive_msg), 0, (struct sockaddr *) &client_address, (socklen_t *) &client_address);
-		if (cond) {
+		//if (cond) {
 			printf("received: %s\n", receive_msg);
 			cond = false;
-		}
+		//}
 	}
 	//pthread_exit(NULL);
 }
 class Node {
-
+private:
+	int ownPort;
+public:
+	Node(int port) {
+		ownPort = port;
+	}
 };
 
 int main(int argc, char** argv) {
@@ -56,6 +61,11 @@ int main(int argc, char** argv) {
 	server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 	memset(server_address.sin_zero,'\0',8);
 
+	client_address.sin_family = AF_INET;
+	client_address.sin_port = htons(1235);
+	client_address.sin_addr.s_addr = inet_addr("127.0.0.1");
+	memset(client_address.sin_zero,'\0',8);
+
 	err = bind(connection_socket, (struct sockaddr *) &server_address, sizeof(struct sockaddr));
 	if(err < 0) {
 		printf("Binding Failed!!!\n");
@@ -64,11 +74,11 @@ int main(int argc, char** argv) {
 
 	bool cond1 = true;
 	while(1) {
-		sendto(connection_socket, send_msg, strlen(send_msg), 0, (struct sockaddr *) &server_address, sizeof(server_address));
-		if (cond1) {
+		sendto(connection_socket, send_msg, strlen(send_msg), 0, (struct sockaddr *) &client_address, sizeof(client_address));
+		//if (cond1) {
 			printf("sent: %s\n", send_msg);
 			cond1 = false;
-		}
+		//}
 	}
 
 	//pthread_create(&tid[0], NULL, always_receiving, NULL);
